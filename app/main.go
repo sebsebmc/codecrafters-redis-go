@@ -21,9 +21,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	buf := make([]byte, 0)
-
 	for {
+		buf := make([]byte, 10)
 		n, err := conn.Read(buf)
 		if err != nil {
 			os.Exit(1)
