@@ -21,5 +21,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	conn.Write([]byte("+PONG\r\n"))
+	buf := make([]byte, 0)
+
+	for {
+		conn.Read(buf)
+		conn.Write([]byte("+PONG\r\n"))
+	}
 }
