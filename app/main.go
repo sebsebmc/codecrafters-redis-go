@@ -22,7 +22,7 @@ func main() {
 	}
 
 	for {
-		buf := make([]byte, 10)
+		buf := make([]byte, 14)
 		n, err := conn.Read(buf)
 		if err != nil {
 			os.Exit(1)
