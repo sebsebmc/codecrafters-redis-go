@@ -45,7 +45,7 @@ func handleConn(conn net.Conn) {
 		if err != nil {
 			if !errors.Is(err, os.ErrDeadlineExceeded) {
 				slog.Debug("Connection closing due to error", "error", err)
-				os.Exit(1)
+				return
 			}
 		}
 		messageQueue = append(messageQueue, buf)
