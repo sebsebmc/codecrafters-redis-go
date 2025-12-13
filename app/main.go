@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
+	"errors"
 	"fmt"
 	"net"
 	"os"
+	"time"
 )
 
 func main() {
@@ -15,19 +19,34 @@ func main() {
 		fmt.Println("Failed to bind to port 6379")
 		os.Exit(1)
 	}
-	conn, err := l.Accept()
-	if err != nil {
-		fmt.Println("Error accepting connection: ", err.Error())
-		os.Exit(1)
-	}
 
 	for {
-		buf := make([]byte, 14)
-		n, err := conn.Read(buf)
+		conn, err := l.Accept()
 		if err != nil {
+			fmt.Println("Error accepting connection: ", err.Error())
 			os.Exit(1)
 		}
-		if n > 0 {
+		go handleConn(conn)
+	}
+
+}
+
+func handleConn(conn net.Conn) {
+	messageQueue := make([][]byte, 0)
+
+	br := bufio.NewReader(conn)
+
+	for {
+		conn.SetReadDeadline(time.Now().Add(1 * time.Second))
+		buf, err := br.ReadBytes('\n')
+
+		if err != nil {
+			if !errors.Is(err, os.ErrDeadlineExceeded) {
+				os.Exit(1)
+			}
+		}
+		messageQueue = append(messageQueue, buf)
+		if bytes.Contains(bytes.ToLower(buf), []byte("ping")) {
 			conn.Write([]byte("+PONG\r\n"))
 		}
 	}
