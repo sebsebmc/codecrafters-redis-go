@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"os"
 	"time"
@@ -13,6 +14,7 @@ import (
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Println("Logs from your program will appear here!")
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	l, err := net.Listen("tcp", "0.0.0.0:6379")
 	if err != nil {
@@ -42,6 +44,7 @@ func handleConn(conn net.Conn) {
 
 		if err != nil {
 			if !errors.Is(err, os.ErrDeadlineExceeded) {
+				slog.Debug("Connection closing due to error", "error", err)
 				os.Exit(1)
 			}
 		}
