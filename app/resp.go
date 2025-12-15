@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log/slog"
 	"strconv"
 )
 
@@ -56,7 +57,8 @@ func (r *RespParser) parseSize() (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("Did not find size in buffer")
 	}
-	arrLen, err := strconv.ParseInt(string(bs[:len(bs)-3]), 10, 0)
+	slog.Debug("Size bytes", "val", bs)
+	arrLen, err := strconv.ParseInt(string(bs[:len(bs)-2]), 10, 0)
 	if err != nil {
 		return 0, err
 	}
