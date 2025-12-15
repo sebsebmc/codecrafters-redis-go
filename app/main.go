@@ -29,11 +29,12 @@ func main() {
 		}
 		go handleConn(conn)
 	}
-
 }
 
 func handleConn(conn net.Conn) {
 	rp := MakeRespParser(conn)
+
+	kv := make(map[string]string)
 
 	for {
 		conn.SetReadDeadline(time.Now().Add(1 * time.Second))
@@ -51,6 +52,13 @@ func handleConn(conn net.Conn) {
 			conn.Write([]byte("+PONG\r\n"))
 		case "ECHO":
 			OutputBulkStrings(c.Args, conn)
+		case "SET":
+			if len(c.Args) > 2 {
+				kv[c.Args[0]] = c.Args[1]
+				conn.Write([]byte("+OK\r\n"))
+			}
+		case "GET":
+			OutputBulkStrings([]string{kv[c.Args[0]]}, conn)
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
 		}
