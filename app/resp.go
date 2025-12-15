@@ -78,5 +78,6 @@ func (r *RespParser) parseBulkString() (string, error) {
 	}
 	bulkStr := make([]byte, strLen)
 	r.reader.Read(bulkStr)
+	r.reader.Discard(2)
 	return string(bulkStr), nil
 }
