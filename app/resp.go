@@ -25,7 +25,10 @@ func MakeRespParser(in io.Reader) *RespParser {
 
 func (r *RespParser) Parse() (*Command, error) {
 	b, err := r.reader.ReadByte()
-	if err != nil || b != '*' {
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse command reading: %w", err)
+	}
+	if b != '*' {
 		return nil, fmt.Errorf("command is not an array, expected '*' got '%c'", b)
 	}
 
