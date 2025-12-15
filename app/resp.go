@@ -81,3 +81,10 @@ func (r *RespParser) parseBulkString() (string, error) {
 	r.reader.Discard(2)
 	return string(bulkStr), nil
 }
+
+func OutputBulkStrings(strs []string, wr io.Writer) {
+	wr.Write([]byte("$"))
+	for _, v := range strs {
+		wr.Write([]byte(fmt.Sprintf("%d\r\n%s\r\n", len(v), v)))
+	}
+}

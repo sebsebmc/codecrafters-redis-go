@@ -50,10 +50,7 @@ func handleConn(conn net.Conn) {
 		case "PING":
 			conn.Write([]byte("+PONG\r\n"))
 		case "ECHO":
-			conn.Write([]byte("$"))
-			for _, v := range c.Args {
-				conn.Write([]byte(fmt.Sprintf("%d\r\n%s\r\n", len(v), v)))
-			}
+			OutputBulkStrings(c.Args, conn)
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
 		}
