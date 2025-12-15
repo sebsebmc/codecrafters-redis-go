@@ -32,11 +32,10 @@ func main() {
 }
 
 func handleConn(conn net.Conn) {
-	rp := MakeRespParser(conn)
-
 	kv := make(map[string]string)
 
 	for {
+		rp := MakeRespParser(conn)
 		conn.SetReadDeadline(time.Now().Add(1 * time.Second))
 		c, err := rp.Parse()
 
