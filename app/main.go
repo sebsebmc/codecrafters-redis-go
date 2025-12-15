@@ -45,6 +45,7 @@ func handleConn(conn net.Conn) {
 				return
 			}
 		}
+		slog.Info("Command received", "name", c.Name)
 
 		switch strings.ToUpper(c.Name) {
 		case "PING":
