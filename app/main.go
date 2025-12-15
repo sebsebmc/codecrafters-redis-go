@@ -33,8 +33,6 @@ func main() {
 }
 
 func handleConn(conn net.Conn) {
-	messageQueue := make([][]byte, 0)
-
 	rp := MakeRespParser(conn)
 
 	for {
