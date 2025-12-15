@@ -13,13 +13,11 @@ type Command struct {
 }
 
 type RespParser struct {
-	pos    int
 	reader *bufio.Reader
 }
 
 func MakeRespParser(in io.Reader) *RespParser {
 	return &RespParser{
-		pos:    0,
 		reader: bufio.NewReader(in),
 	}
 }
@@ -29,7 +27,6 @@ func (r *RespParser) Parse() (*Command, error) {
 	if err != nil || b != '*' {
 		return nil, fmt.Errorf("Command is not an array")
 	}
-	r.pos = 1
 
 	c := new(Command)
 
@@ -59,7 +56,7 @@ func (r *RespParser) parseSize() (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("Did not find size in buffer")
 	}
-	arrLen, err := strconv.ParseInt(string(bs[:len(bs)-2]), 10, 0)
+	arrLen, err := strconv.ParseInt(string(bs[:len(bs)-3]), 10, 0)
 	if err != nil {
 		return 0, err
 	}
@@ -72,7 +69,7 @@ func (r *RespParser) parseBulkString() (string, error) {
 	if err != nil || b != '$' {
 		return "", fmt.Errorf("Invalid identifier for bulk string")
 	}
-	r.pos += 1
+
 	strLen, err := r.parseSize()
 	if err != nil {
 		return "", err
