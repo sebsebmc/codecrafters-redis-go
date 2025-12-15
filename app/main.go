@@ -1,13 +1,12 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	"log/slog"
 	"net"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -36,11 +35,11 @@ func main() {
 func handleConn(conn net.Conn) {
 	messageQueue := make([][]byte, 0)
 
-	br := bufio.NewReader(conn)
+	rp := MakeRespParser(conn)
 
 	for {
 		conn.SetReadDeadline(time.Now().Add(1 * time.Second))
-		buf, err := br.ReadBytes('\n')
+		c, err := rp.Parse()
 
 		if err != nil {
 			if !errors.Is(err, os.ErrDeadlineExceeded) {
@@ -48,9 +47,14 @@ func handleConn(conn net.Conn) {
 				return
 			}
 		}
-		messageQueue = append(messageQueue, buf)
-		if bytes.Contains(bytes.ToLower(buf), []byte("ping")) {
+
+		switch strings.ToUpper(c.Name) {
+		case "PING":
 			conn.Write([]byte("+PONG\r\n"))
+		case "ECHO":
+			conn.Write([]byte(fmt.Sprintf("$%d\r\n%s\r\n", len(c.Args), strings.Join(c.Args, "\r\n"))))
+		default:
+			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
 		}
 	}
 }
