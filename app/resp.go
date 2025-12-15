@@ -71,7 +71,11 @@ func (r *RespParser) parseSize() (int, error) {
 
 func (r *RespParser) parseBulkString() (string, error) {
 	b, err := r.reader.ReadByte()
-	if err != nil || b != '$' {
+	if err != nil {
+		return "", fmt.Errorf("cannot read bulk string: %w", err)
+	}
+
+	if b != '$' {
 		return "", fmt.Errorf("Invalid identifier for bulk string, expected '$' got '%c'", b)
 	}
 
