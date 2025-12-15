@@ -40,8 +40,8 @@ func handleConn(conn net.Conn) {
 		c, err := rp.Parse()
 
 		if err != nil {
+			slog.Debug("Connection error", "message", err)
 			if !errors.Is(err, os.ErrDeadlineExceeded) {
-				slog.Debug("Connection error", "message", err)
 				return
 			}
 		}
