@@ -53,7 +53,7 @@ func handleConn(conn net.Conn) {
 		case "ECHO":
 			OutputBulkStrings(c.Args, conn)
 		case "SET":
-			if len(c.Args) > 2 {
+			if len(c.Args) >= 2 {
 				kv[c.Args[0]] = c.Args[1]
 				conn.Write([]byte("+OK\r\n"))
 			}
