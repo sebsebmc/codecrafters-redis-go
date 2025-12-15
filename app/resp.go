@@ -26,7 +26,7 @@ func MakeRespParser(in io.Reader) *RespParser {
 func (r *RespParser) Parse() (*Command, error) {
 	b, err := r.reader.ReadByte()
 	if err != nil || b != '*' {
-		return nil, fmt.Errorf("Command is not an array")
+		return nil, fmt.Errorf("command is not an array, expected '*' got '%c'", b)
 	}
 
 	c := new(Command)
@@ -55,7 +55,7 @@ func (r *RespParser) Parse() (*Command, error) {
 func (r *RespParser) parseSize() (int, error) {
 	bs, err := r.reader.ReadBytes('\r')
 	if err != nil {
-		return 0, fmt.Errorf("Did not find size in buffer")
+		return 0, fmt.Errorf("Did not find size in buffer: %w", err)
 	}
 	slog.Debug("Size bytes", "val", bs[:len(bs)-1])
 	arrLen, err := strconv.ParseInt(string(bs[:len(bs)-1]), 10, 0)
@@ -69,7 +69,7 @@ func (r *RespParser) parseSize() (int, error) {
 func (r *RespParser) parseBulkString() (string, error) {
 	b, err := r.reader.ReadByte()
 	if err != nil || b != '$' {
-		return "", fmt.Errorf("Invalid identifier for bulk string")
+		return "", fmt.Errorf("Invalid identifier for bulk string, expected '$' got '%c'", b)
 	}
 
 	strLen, err := r.parseSize()
