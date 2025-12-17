@@ -96,3 +96,11 @@ func OutputBulkStrings(strs []string, wr io.Writer) {
 		wr.Write([]byte(fmt.Sprintf("%d\r\n%s\r\n", len(v), v)))
 	}
 }
+
+func OutputSimpleString(str string, wr io.Writer) {
+	wr.Write(fmt.Appendf(nil, "+%s\r\n", str))
+}
+
+func OutputNullSimpleString(wr io.Writer) {
+	wr.Write([]byte("$-1\r\n"))
+}

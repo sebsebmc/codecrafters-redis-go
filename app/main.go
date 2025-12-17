@@ -54,11 +54,20 @@ func handleConn(conn net.Conn) {
 			OutputBulkStrings(c.Args, conn)
 		case "SET":
 			if len(c.Args) >= 2 {
+				OutputSimpleString("OK", conn)
 				kv[c.Args[0]] = c.Args[1]
 				conn.Write([]byte("+OK\r\n"))
 			}
 		case "GET":
-			OutputBulkStrings([]string{kv[c.Args[0]]}, conn)
+			if len(c.Args) < 1 {
+				OutputNullSimpleString(conn)
+			}
+			val, ok := kv[c.Args[0]]
+			if !ok {
+				OutputNullSimpleString(conn)
+			} else {
+				OutputBulkStrings([]string{val}, conn)
+			}
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
 		}
