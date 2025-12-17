@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -31,8 +32,13 @@ func main() {
 	}
 }
 
+type Value struct {
+	val    string
+	expiry time.Time
+}
+
 func handleConn(conn net.Conn) {
-	kv := make(map[string]string)
+	kv := make(map[string]Value)
 
 	for {
 		rp := MakeRespParser(conn)
@@ -53,10 +59,19 @@ func handleConn(conn net.Conn) {
 		case "ECHO":
 			OutputBulkStrings(c.Args, conn)
 		case "SET":
-			if len(c.Args) >= 2 {
+			if len(c.Args) == 2 {
+				kv[c.Args[0]] = Value{val: c.Args[1]}
 				OutputSimpleString("OK", conn)
-				kv[c.Args[0]] = c.Args[1]
-				conn.Write([]byte("+OK\r\n"))
+			} else if len(c.Args) == 4 {
+				num, _ := strconv.Atoi(c.Args[3])
+				switch c.Args[2] {
+				case "EX":
+					kv[c.Args[0]] = Value{c.Args[1], time.Now().Add(time.Duration(num) * time.Second)}
+					OutputSimpleString("OK", conn)
+				case "PX":
+					kv[c.Args[0]] = Value{c.Args[1], time.Now().Add(time.Duration(num) * time.Millisecond)}
+					OutputSimpleString("OK", conn)
+				}
 			}
 		case "GET":
 			if len(c.Args) < 1 {
@@ -66,7 +81,12 @@ func handleConn(conn net.Conn) {
 			if !ok {
 				OutputNullSimpleString(conn)
 			} else {
-				OutputBulkStrings([]string{val}, conn)
+				if val.expiry.IsZero() || val.expiry.After(time.Now()) {
+					OutputBulkStrings([]string{val.val}, conn)
+				} else { // Expired
+					delete(kv, c.Args[0])
+					OutputNullSimpleString(conn)
+				}
 			}
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
