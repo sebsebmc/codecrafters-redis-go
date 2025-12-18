@@ -92,7 +92,7 @@ func (s *Server) handleConn(conn net.Conn) {
 				}
 			}
 		case "RPUSH":
-			s.lists[c.Args[0]] = append(s.lists[c.Args[0]], c.Args[1])
+			s.lists[c.Args[0]] = append(s.lists[c.Args[0]], c.Args[1:]...)
 			OutputInteger(len(s.lists[c.Args[0]]), conn)
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
