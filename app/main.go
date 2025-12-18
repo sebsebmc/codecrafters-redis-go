@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -61,6 +62,7 @@ func (s *Server) handleConn(conn net.Conn) {
 			if !errors.Is(err, os.ErrDeadlineExceeded) {
 				return
 			}
+			continue
 		}
 		slog.Info("Command received", "name", c.Name)
 
@@ -92,8 +94,30 @@ func (s *Server) handleConn(conn net.Conn) {
 				}
 			}
 		case "RPUSH":
+			if len(c.Args) < 2 {
+				slog.Error("Not enough arguments")
+				continue
+			}
 			s.lists[c.Args[0]] = append(s.lists[c.Args[0]], c.Args[1:]...)
 			OutputInteger(len(s.lists[c.Args[0]]), conn)
+		case "LRANGE":
+			if len(c.Args) < 3 {
+				slog.Error("Not enough arguments")
+				continue
+			}
+			start, err := strconv.Atoi(c.Args[1])
+			if err != nil {
+				slog.Error("Invalid index", "arg", c.Args[1])
+				continue
+			}
+			end, err := strconv.Atoi(c.Args[2])
+			if err != nil {
+				slog.Error("Invalid index", "arg", c.Args[2])
+				continue
+			}
+			start = min(start, 0)
+			end = max(len(s.lists[c.Args[0]]), end+1)
+			OutputArray(s.lists[c.Args[0]][start:end], conn)
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
 		}
