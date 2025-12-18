@@ -115,11 +115,11 @@ func ValidateSetCommand(c *Command) (*SetCommand, error) {
 	sc.Key = c.Args[0]
 	sc.Value = c.Args[1]
 
-	num, err := strconv.Atoi(c.Args[3])
-	if err != nil {
-		return nil, err
-	}
 	if len(c.Args) == 4 {
+		num, err := strconv.Atoi(c.Args[3])
+		if err != nil {
+			return nil, err
+		}
 		switch c.Args[2] {
 		case "EX":
 			sc.Expiry = time.Now().Add(time.Duration(num) * time.Second)
