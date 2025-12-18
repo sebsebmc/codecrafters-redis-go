@@ -21,13 +21,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	s := MakeServer()
+
 	for {
 		conn, err := l.Accept()
 		if err != nil {
 			fmt.Println("Error accepting connection: ", err.Error())
 			os.Exit(1)
 		}
-		go handleConn(conn)
+		go s.handleConn(conn)
 	}
 }
 
@@ -36,9 +38,19 @@ type Value struct {
 	expiry time.Time
 }
 
-func handleConn(conn net.Conn) {
-	kv := make(map[string]Value)
+type Server struct {
+	simpleMap map[string]Value
+	lists     map[string][]string
+}
 
+func MakeServer() *Server {
+	s := new(Server)
+	s.simpleMap = make(map[string]Value)
+	s.lists = make(map[string][]string)
+	return s
+}
+
+func (s *Server) handleConn(conn net.Conn) {
 	for {
 		rp := MakeRespParser(conn)
 		conn.SetReadDeadline(time.Now().Add(1 * time.Second))
@@ -62,23 +74,26 @@ func handleConn(conn net.Conn) {
 			if err != nil {
 				slog.Error(err.Error())
 			}
-			kv[sc.Key] = Value{val: sc.Value, expiry: sc.Expiry}
+			s.simpleMap[sc.Key] = Value{val: sc.Value, expiry: sc.Expiry}
 			OutputSimpleString("OK", conn)
 		case "GET":
 			if len(c.Args) < 1 {
 				OutputNullSimpleString(conn)
 			}
-			val, ok := kv[c.Args[0]]
+			val, ok := s.simpleMap[c.Args[0]]
 			if !ok {
 				OutputNullSimpleString(conn)
 			} else {
 				if val.expiry.IsZero() || val.expiry.After(time.Now()) {
 					OutputBulkStrings([]string{val.val}, conn)
 				} else { // Expired
-					delete(kv, c.Args[0])
+					delete(s.simpleMap, c.Args[0])
 					OutputNullSimpleString(conn)
 				}
 			}
+		case "RPUSH":
+			s.lists[c.Args[0]] = append(s.lists[c.Args[0]], c.Args[1])
+			OutputInteger(len(s.lists[c.Args[0]]), conn)
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
 		}

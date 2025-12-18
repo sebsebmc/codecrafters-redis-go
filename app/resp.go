@@ -139,3 +139,7 @@ func OutputSimpleString(str string, wr io.Writer) {
 func OutputNullSimpleString(wr io.Writer) {
 	wr.Write([]byte("$-1\r\n"))
 }
+
+func OutputInteger(i int, wr io.Writer) {
+	wr.Write(fmt.Appendf(nil, ":%d\r\n", i))
+}
