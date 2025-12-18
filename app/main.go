@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -59,20 +58,12 @@ func handleConn(conn net.Conn) {
 		case "ECHO":
 			OutputBulkStrings(c.Args, conn)
 		case "SET":
-			if len(c.Args) == 2 {
-				kv[c.Args[0]] = Value{val: c.Args[1]}
-				OutputSimpleString("OK", conn)
-			} else if len(c.Args) == 4 {
-				num, _ := strconv.Atoi(c.Args[3])
-				switch c.Args[2] {
-				case "EX":
-					kv[c.Args[0]] = Value{c.Args[1], time.Now().Add(time.Duration(num) * time.Second)}
-					OutputSimpleString("OK", conn)
-				case "PX":
-					kv[c.Args[0]] = Value{c.Args[1], time.Now().Add(time.Duration(num) * time.Millisecond)}
-					OutputSimpleString("OK", conn)
-				}
+			sc, err := ValidateSetCommand(c)
+			if err != nil {
+				slog.Error(err.Error())
 			}
+			kv[sc.Key] = Value{val: sc.Value, expiry: sc.Expiry}
+			OutputSimpleString("OK", conn)
 		case "GET":
 			if len(c.Args) < 1 {
 				OutputNullSimpleString(conn)

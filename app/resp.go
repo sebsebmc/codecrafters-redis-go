@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"strconv"
+	"time"
 )
 
 type Command struct {
@@ -95,6 +96,40 @@ func OutputBulkStrings(strs []string, wr io.Writer) {
 	for _, v := range strs {
 		wr.Write([]byte(fmt.Sprintf("%d\r\n%s\r\n", len(v), v)))
 	}
+}
+
+type SetCommand struct {
+	Key    string
+	Value  string
+	Expiry time.Time
+}
+
+func ValidateSetCommand(c *Command) (*SetCommand, error) {
+	if c.Name != "SET" {
+		return nil, fmt.Errorf("command name is not SET")
+	}
+	if !(len(c.Args) == 2 || len(c.Args) == 4) {
+		return nil, fmt.Errorf("command SET has invalid number of arguments: %d", len(c.Args))
+	}
+	sc := new(SetCommand)
+	sc.Key = c.Args[0]
+	sc.Value = c.Args[1]
+
+	num, err := strconv.Atoi(c.Args[3])
+	if err != nil {
+		return nil, err
+	}
+	if len(c.Args) == 4 {
+		switch c.Args[2] {
+		case "EX":
+			sc.Expiry = time.Now().Add(time.Duration(num) * time.Second)
+		case "PX":
+			sc.Expiry = time.Now().Add(time.Duration(num) * time.Millisecond)
+		default:
+			return nil, fmt.Errorf("invalid expiry specifier for SET: '%s'", c.Args[2])
+		}
+	}
+	return sc, nil
 }
 
 func OutputSimpleString(str string, wr io.Writer) {
