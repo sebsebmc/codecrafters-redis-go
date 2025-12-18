@@ -115,8 +115,8 @@ func (s *Server) handleConn(conn net.Conn) {
 				slog.Error("Invalid index", "arg", c.Args[2])
 				continue
 			}
-			start = min(start, 0)
-			end = max(len(s.lists[c.Args[0]]), end+1)
+			start = max(start, 0)
+			end = min(len(s.lists[c.Args[0]]), end+1)
 			OutputArray(s.lists[c.Args[0]][start:end], conn)
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
