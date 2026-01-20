@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"net"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -81,6 +80,7 @@ func (s *Server) handleConn(conn net.Conn) {
 		case "GET":
 			if len(c.Args) < 1 {
 				OutputNullSimpleString(conn)
+				continue
 			}
 			val, ok := s.simpleMap[c.Args[0]]
 			if !ok {
@@ -94,29 +94,31 @@ func (s *Server) handleConn(conn net.Conn) {
 				}
 			}
 		case "RPUSH":
-			if len(c.Args) < 2 {
-				slog.Error("Not enough arguments")
+			rpc, err := ValidateRPushCommand(c)
+			if err != nil {
+				// TODO return error?
 				continue
 			}
-			s.lists[c.Args[0]] = append(s.lists[c.Args[0]], c.Args[1:]...)
-			OutputInteger(len(s.lists[c.Args[0]]), conn)
+			s.lists[rpc.ListKey] = append(s.lists[rpc.ListKey], rpc.Values...)
+			OutputInteger(len(s.lists[rpc.ListKey]), conn)
 		case "LRANGE":
-			if len(c.Args) < 3 {
-				slog.Error("Not enough arguments")
-				continue
-			}
-			start, err := strconv.Atoi(c.Args[1])
+			lrc, err := ValidateLRangeCommand(c)
 			if err != nil {
-				slog.Error("Invalid index", "arg", c.Args[1])
+				slog.Error(err.Error())
 				continue
 			}
-			end, err := strconv.Atoi(c.Args[2])
-			if err != nil {
-				slog.Error("Invalid index", "arg", c.Args[2])
-				continue
+			start := 0
+			end := 0
+			if lrc.Start < 0 {
+				start = max(0, lrc.Start+len(s.lists[lrc.ListKey]))
+			} else {
+				start = min(lrc.Start, len(s.lists[lrc.ListKey]))
 			}
-			start = max(start, 0)
-			end = min(len(s.lists[c.Args[0]]), end+1)
+			if lrc.End < 0 {
+				end = max(0, lrc.End+len(s.lists[lrc.ListKey]))
+			} else {
+				end = min(len(s.lists[lrc.ListKey]), end+1)
+			}
 			OutputArray(s.lists[c.Args[0]][start:end], conn)
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))

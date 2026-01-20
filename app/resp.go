@@ -106,10 +106,10 @@ type SetCommand struct {
 
 func ValidateSetCommand(c *Command) (*SetCommand, error) {
 	if c.Name != "SET" {
-		return nil, fmt.Errorf("command name is not SET")
+		return nil, fmt.Errorf("command name is not 'SET'")
 	}
 	if !(len(c.Args) == 2 || len(c.Args) == 4) {
-		return nil, fmt.Errorf("command SET has invalid number of arguments: %d", len(c.Args))
+		return nil, fmt.Errorf("command 'SET' has invalid number of arguments: %d", len(c.Args))
 	}
 	sc := new(SetCommand)
 	sc.Key = c.Args[0]
@@ -130,6 +130,55 @@ func ValidateSetCommand(c *Command) (*SetCommand, error) {
 		}
 	}
 	return sc, nil
+}
+
+type RPushCommand struct {
+	Name    string
+	ListKey string
+	Values  []string
+}
+
+func ValidateRPushCommand(c *Command) (*RPushCommand, error) {
+	if c.Name != "RPUSH" {
+		return nil, fmt.Errorf("command name not 'RPUSH'")
+	}
+	if len(c.Args) < 3 {
+		return nil, fmt.Errorf("command 'RPUSH' has not enough arguments")
+	}
+	rpc := new(RPushCommand)
+	rpc.ListKey = c.Args[0]
+	rpc.Values = c.Args[1:]
+	return rpc, nil
+}
+
+type LRangeCommand struct {
+	Name    string
+	ListKey string
+	Start   int
+	End     int
+}
+
+func ValidateLRangeCommand(c *Command) (*LRangeCommand, error) {
+	if c.Name != "RPUSH" {
+		return nil, fmt.Errorf("command name not 'RPUSH'")
+	}
+	if len(c.Args) < 3 {
+
+	}
+	start, err := strconv.Atoi(c.Args[1])
+	if err != nil {
+		return nil, fmt.Errorf("invalid 'LRANGE' start index: '%s'", c.Args[1])
+	}
+	end, err := strconv.Atoi(c.Args[2])
+	if err != nil {
+		return nil, fmt.Errorf("Invalid 'LRANGE' end index: '%s'", c.Args[2])
+	}
+	lrc := new(LRangeCommand)
+	lrc.Name = "LRANGE"
+	lrc.Start = start
+	lrc.End = end
+	lrc.ListKey = c.Args[0]
+	return lrc, nil
 }
 
 func OutputSimpleString(str string, wr io.Writer) {
