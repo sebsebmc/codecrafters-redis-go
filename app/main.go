@@ -119,7 +119,8 @@ func (s *Server) handleConn(conn net.Conn) {
 			} else {
 				end = min(len(s.lists[lrc.ListKey]), end+1)
 			}
-			OutputArray(s.lists[c.Args[0]][start:end], conn)
+			slog.Debug("'LRANGE' command from", "start", start, "end", end)
+			OutputArray(s.lists[lrc.ListKey][start:end], conn)
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
 		}
