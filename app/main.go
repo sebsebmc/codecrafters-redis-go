@@ -107,8 +107,8 @@ func (s *Server) handleConn(conn net.Conn) {
 				slog.Error(err.Error())
 				continue
 			}
-			start := 0
-			end := 0
+			start := lrc.Start
+			end := lrc.End
 			listLen := len(s.lists[lrc.ListKey])
 			if lrc.Start < 0 {
 				start = max(0, lrc.Start+listLen)
