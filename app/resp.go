@@ -159,7 +159,7 @@ type LRangeCommand struct {
 }
 
 func ValidateLRangeCommand(c *Command) (*LRangeCommand, error) {
-	if c.Name != "RPUSH" {
+	if c.Name != "LRANGE" {
 		return nil, fmt.Errorf("command name not 'RPUSH'")
 	}
 	if len(c.Args) < 3 {
