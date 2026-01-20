@@ -142,7 +142,7 @@ func ValidateRPushCommand(c *Command) (*RPushCommand, error) {
 	if c.Name != "RPUSH" {
 		return nil, fmt.Errorf("command name not 'RPUSH'")
 	}
-	if len(c.Args) < 3 {
+	if len(c.Args) < 2 {
 		return nil, fmt.Errorf("command 'RPUSH' has not enough arguments")
 	}
 	rpc := new(RPushCommand)
