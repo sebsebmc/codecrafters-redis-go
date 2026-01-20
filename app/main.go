@@ -109,15 +109,16 @@ func (s *Server) handleConn(conn net.Conn) {
 			}
 			start := 0
 			end := 0
+			listLen := len(s.lists[lrc.ListKey])
 			if lrc.Start < 0 {
-				start = max(0, lrc.Start+len(s.lists[lrc.ListKey]))
+				start = max(0, lrc.Start+listLen)
 			} else {
-				start = min(lrc.Start, len(s.lists[lrc.ListKey]))
+				start = min(lrc.Start, listLen)
 			}
 			if lrc.End < 0 {
-				end = max(0, lrc.End+len(s.lists[lrc.ListKey]))
+				end = max(0, min(lrc.End+listLen+1, listLen))
 			} else {
-				end = min(len(s.lists[lrc.ListKey]), end+1)
+				end = min(listLen, end+1)
 			}
 			slog.Debug("'LRANGE' command from", "start", start, "end", end)
 			OutputArray(s.lists[lrc.ListKey][start:end], conn)
