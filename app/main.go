@@ -96,6 +96,7 @@ func (s *Server) handleConn(conn net.Conn) {
 		case "RPUSH":
 			rpc, err := ValidateRPushCommand(c)
 			if err != nil {
+				slog.Error(err.Error())
 				// TODO return error?
 				continue
 			}
