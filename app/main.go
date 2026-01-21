@@ -148,9 +148,9 @@ func (s *Server) handleConn(conn net.Conn) {
 				OutputNullSimpleString(conn)
 				continue
 			}
-			val := list[0]
+			val := list[:1]
 			s.lists[c.Args[0]] = list[1:]
-			OutputSimpleString(val, conn)
+			OutputBulkStrings(val, conn)
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
 		}
