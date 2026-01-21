@@ -135,6 +135,8 @@ func (s *Server) handleConn(conn net.Conn) {
 			}
 			s.lists[lpc.ListKey] = append(reversed, s.lists[lpc.ListKey]...)
 			OutputInteger(len(s.lists[lpc.ListKey]), conn)
+		case "LLEN":
+			OutputInteger(len(s.lists[c.Args[1]]), conn)
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
 		}
