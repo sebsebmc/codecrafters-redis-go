@@ -163,7 +163,7 @@ func ValidateLRangeCommand(c *Command) (*LRangeCommand, error) {
 		return nil, fmt.Errorf("command name not 'RPUSH'")
 	}
 	if len(c.Args) < 3 {
-
+		return nil, fmt.Errorf("insufficient arguments for 'LRANGE'")
 	}
 	start, err := strconv.Atoi(c.Args[1])
 	if err != nil {
@@ -179,6 +179,26 @@ func ValidateLRangeCommand(c *Command) (*LRangeCommand, error) {
 	lrc.End = end
 	lrc.ListKey = c.Args[0]
 	return lrc, nil
+}
+
+type LPushCommand struct {
+	Name    string
+	ListKey string
+	Values  []string
+}
+
+func ValidateLPushCommand(c *Command) (*LPushCommand, error) {
+	if c.Name != "LPUSH" {
+		return nil, fmt.Errorf("command name not 'LPUSH'")
+	}
+	if len(c.Args) < 2 {
+		return nil, fmt.Errorf("insufficient arguments for 'LPUSH'")
+	}
+	lpc := new(LPushCommand)
+	lpc.Name = "LPUSH"
+	lpc.ListKey = c.Args[0]
+	lpc.Values = c.Args[1:]
+	return lpc, nil
 }
 
 func OutputSimpleString(str string, wr io.Writer) {

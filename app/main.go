@@ -123,6 +123,14 @@ func (s *Server) handleConn(conn net.Conn) {
 			}
 			slog.Debug("'LRANGE' command from", "start", start, "end", end)
 			OutputArray(s.lists[lrc.ListKey][start:end], conn)
+		case "LPUSH":
+			lpc, err := ValidateLPushCommand(c)
+			if err != nil {
+				slog.Error(err.Error())
+				continue
+			}
+			s.lists[lpc.ListKey] = append(lpc.Values, s.lists[lpc.ListKey]...)
+			OutputInteger(len(s.lists[lpc.ListKey]), conn)
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
 		}
