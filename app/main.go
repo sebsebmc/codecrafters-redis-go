@@ -153,7 +153,7 @@ func (s *Server) handleConn(conn net.Conn) {
 				OutputNullSimpleString(conn)
 				continue
 			}
-			idx := max(len(list), lpc.Count)
+			idx := min(len(list), lpc.Count)
 			val := list[:idx]
 			s.lists[lpc.ListKey] = list[idx:]
 			if lpc.Count > 1 {
