@@ -201,6 +201,34 @@ func ValidateLPushCommand(c *Command) (*LPushCommand, error) {
 	return lpc, nil
 }
 
+type LPopCommand struct {
+	Name    string
+	ListKey string
+	Count   int
+}
+
+func ValidateLPopCommand(c *Command) (*LPopCommand, error) {
+	if c.Name != "LPOP" {
+		return nil, fmt.Errorf("command name not 'LPOP'")
+	}
+	if len(c.Args) < 1 {
+		return nil, fmt.Errorf("insufficient arguments for 'LPOP'")
+	}
+	lpc := new(LPopCommand)
+	lpc.Name = "LPOP"
+	lpc.ListKey = c.Args[0]
+	if len(c.Args) == 2 {
+		count, err := strconv.Atoi(c.Args[1])
+		if err != nil {
+			return nil, fmt.Errorf("invalid 'LPOP' count: '%s'", c.Args[1])
+		}
+		lpc.Count = count
+	} else {
+		lpc.Count = 1
+	}
+	return lpc, nil
+}
+
 func OutputSimpleString(str string, wr io.Writer) {
 	wr.Write(fmt.Appendf(nil, "+%s\r\n", str))
 }

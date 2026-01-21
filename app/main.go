@@ -143,13 +143,19 @@ func (s *Server) handleConn(conn net.Conn) {
 			}
 			OutputInteger(len(list), conn)
 		case "LPOP":
-			list, ok := s.lists[c.Args[0]]
+			lpc, err := ValidateLPopCommand(c)
+			if err != nil {
+				slog.Error(err.Error())
+				continue
+			}
+			list, ok := s.lists[lpc.ListKey]
 			if !ok || len(list) == 0 {
 				OutputNullSimpleString(conn)
 				continue
 			}
-			val := list[:1]
-			s.lists[c.Args[0]] = list[1:]
+			idx := max(len(list), lpc.Count)
+			val := list[:idx]
+			s.lists[lpc.ListKey] = list[idx:]
 			OutputBulkStrings(val, conn)
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
