@@ -136,7 +136,7 @@ func (s *Server) handleConn(conn net.Conn) {
 			s.lists[lpc.ListKey] = append(reversed, s.lists[lpc.ListKey]...)
 			OutputInteger(len(s.lists[lpc.ListKey]), conn)
 		case "LLEN":
-			list, ok := s.lists[c.Args[1]]
+			list, ok := s.lists[c.Args[0]]
 			if !ok {
 				OutputInteger(0, conn)
 				continue
