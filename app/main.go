@@ -156,7 +156,11 @@ func (s *Server) handleConn(conn net.Conn) {
 			idx := max(len(list), lpc.Count)
 			val := list[:idx]
 			s.lists[lpc.ListKey] = list[idx:]
-			OutputBulkStrings(val, conn)
+			if lpc.Count > 1 {
+				OutputArray(val, conn)
+			} else {
+				OutputBulkStrings(val, conn)
+			}
 		default:
 			slog.Error("Unknown command", "name", c.Name, slog.Group("args", c.Args))
 		}
