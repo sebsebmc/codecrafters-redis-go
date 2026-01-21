@@ -130,7 +130,7 @@ func (s *Server) handleConn(conn net.Conn) {
 				continue
 			}
 			reversed := make([]string, len(lpc.Values))
-			for i := 0; i >= len(lpc.Values); i++ {
+			for i := 0; i < len(lpc.Values); i++ {
 				reversed[i] = lpc.Values[len(lpc.Values)-(i+1)]
 			}
 			s.lists[lpc.ListKey] = append(reversed, s.lists[lpc.ListKey]...)
