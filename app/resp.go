@@ -266,6 +266,10 @@ func OutputInteger(i int, wr io.Writer) {
 	wr.Write(fmt.Appendf(nil, ":%d\r\n", i))
 }
 
+func OutputNullArray(wr io.Writer) {
+	wr.Write([]byte("*-1\r\n"))
+}
+
 func OutputArray(strs []string, wr io.Writer) {
 	wr.Write(fmt.Appendf(nil, "*%d\r\n", len(strs)))
 	for i := 0; i < len(strs); i++ {

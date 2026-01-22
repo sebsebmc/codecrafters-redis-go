@@ -238,7 +238,7 @@ func (s *Server) handleConn(ctx context.Context, conn net.Conn) {
 								// We could make waiting a map of maps as well to make this not O(n) on the number of waiting clients
 								if v.client == conn { // Should only be one because its a "blocking" wait for the client
 									s.waiting[blpc.ListKey] = slices.Delete(s.waiting[blpc.ListKey], i, i+1)
-									OutputNullSimpleString(v.client)
+									OutputNullArray(v.client)
 									break
 								}
 							}
