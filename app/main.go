@@ -139,9 +139,9 @@ func (s *Server) handleConn(ctx context.Context, conn net.Conn) {
 				OutputInteger(len(s.lists[rpc.ListKey]), conn)
 				if len(s.waiting[rpc.ListKey]) > 0 {
 					waiting := s.waiting[rpc.ListKey][0]
-					first := s.lists[rpc.ListKey][:1]
+					first := s.lists[rpc.ListKey][0]
 					s.lists[rpc.ListKey] = s.lists[rpc.ListKey][1:]
-					OutputArray(first, waiting.client)
+					OutputArray([]string{rpc.ListKey, first}, waiting.client)
 				}
 			}
 		case "LRANGE":
@@ -182,9 +182,9 @@ func (s *Server) handleConn(ctx context.Context, conn net.Conn) {
 				OutputInteger(len(s.lists[lpc.ListKey]), conn)
 				if len(s.waiting[lpc.ListKey]) > 0 {
 					waiting := s.waiting[lpc.ListKey][0]
-					first := s.lists[lpc.ListKey][:1]
+					first := s.lists[lpc.ListKey][0]
 					s.lists[lpc.ListKey] = s.lists[lpc.ListKey][1:]
-					OutputArray(first, waiting.client)
+					OutputArray([]string{lpc.ListKey, first}, waiting.client)
 				}
 			}
 		case "LLEN":
