@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -46,7 +47,7 @@ func (r *RespParser) Parse() (*Command, error) {
 			return nil, err
 		}
 		if i == 0 {
-			c.Name = str
+			c.Name = strings.ToUpper(str)
 		} else {
 			c.Args = append(c.Args, str)
 		}
@@ -226,6 +227,30 @@ func ValidateLPopCommand(c *Command) (*LPopCommand, error) {
 	} else {
 		lpc.Count = 1
 	}
+	return lpc, nil
+}
+
+type BLPopCommand struct {
+	Name    string
+	ListKey string
+	Timeout time.Duration
+}
+
+func ValidateBLPopCommand(c *Command) (*BLPopCommand, error) {
+	if c.Name != "BLPOP" {
+		return nil, fmt.Errorf("command name not 'BLPOP'")
+	}
+	if len(c.Args) < 2 {
+		return nil, fmt.Errorf("insufficient arguments for 'BLPOP'")
+	}
+	lpc := new(BLPopCommand)
+	lpc.Name = "BLPOP"
+	lpc.ListKey = c.Args[0]
+	count, err := strconv.ParseFloat(c.Args[1], 64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid 'BLPOP' time: '%s'", c.Args[1])
+	}
+	lpc.Timeout = time.Duration(count * float64(time.Second))
 	return lpc, nil
 }
 
